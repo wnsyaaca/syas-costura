@@ -4,27 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', "Sya's Costura")</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+
+    {{-- ELEGANT TYPOGRAPHY --}}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+    {{-- TAILWIND --}}
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    {{-- GLOBAL THEME --}}
     <style type="text/tailwindcss">
         @theme {
-            --color-brand: #b83a5e;
-            --color-brand-dark: #2a1a1f;
-            --color-blush: #fbf1ee;
+            --color-brand: #806B57;
+            --color-brand-dark: #292522;
+            --color-blush: #F7F4EE;
             --font-sans: 'DM Sans', sans-serif;
-            --font-serif: 'Fraunces', serif;
+            --font-serif: 'Playfair Display', serif;
         }
     </style>
-    <style>[x-cloak]{display:none !important}</style>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #F7F4EE;
+        }
+    </style>
 </head>
-<body class="bg-blush text-brand-dark font-sans">
 
-    <header class="bg-blush/90 backdrop-blur sticky top-0 z-40 border-b border-rose-100">
-        <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" class="font-serif text-xl font-bold text-brand">Sya's Costura</a>
+<body class="bg-[#F7F4EE] text-[#292522] font-sans">
 
-            <div class="hidden md:flex items-center gap-1 text-sm">
+    {{-- HEADER & NAVBAR --}}
+    <header class="sticky top-0 z-40 border-b border-[#E6DED2] bg-[#F7F4EE]/95 backdrop-blur-md">
+
+        <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+
+            {{-- LOGO --}}
+            <a href="/" class="font-serif text-2xl font-bold tracking-wide text-[#665246] transition hover:text-[#A1876C]">
+                Sya's <span class="text-[#A1876C]">Costura.</span>
+            </a>
+
+            {{-- MENU --}}
+            <div class="hidden items-center gap-1 text-sm font-medium text-[#665246] md:flex">
+
                 @php
                     $menu = [
                         ['Beranda', '/'],
@@ -34,59 +62,155 @@
                         ['Tracking', '/tracking'],
                     ];
                 @endphp
+
                 @foreach ($menu as [$label, $url])
+
                     @php
-                        $active = $url === '/' ? request()->is('/') : request()->is(trim($url, '/') . '*');
+                        $active = $url === '/'
+                            ? request()->is('/')
+                            : request()->is(trim($url, '/') . '*');
                     @endphp
+
                     <a href="{{ $url }}"
-                       class="px-3 py-1.5 rounded-full {{ $active ? 'bg-rose-200 text-brand' : 'hover:bg-rose-100' }}">
+                       class="rounded-full px-4 py-2 transition duration-300
+                       {{ $active
+                            ? 'bg-[#E6DED2] text-[#292522] font-semibold'
+                            : 'text-[#665246] hover:bg-[#EDE7DE] hover:text-[#292522]' }}">
                         {{ $label }}
                     </a>
+
                 @endforeach
+
+                {{-- ADMIN MENU --}}
                 @auth
                     @if (auth()->user()->role === 'admin')
-                        <a href="/admin" class="px-3 py-1.5 rounded-full hover:bg-rose-100">Admin</a>
+                        <a href="/admin"
+                           class="rounded-full px-4 py-2 text-[#665246] transition hover:bg-[#EDE7DE]">
+                            Admin
+                        </a>
                     @endif
                 @endauth
+
             </div>
 
+            {{-- AUTHENTICATION --}}
             <div class="flex items-center gap-2 text-sm">
+
                 @auth
+
                     <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="bg-brand-dark text-white px-4 py-1.5 rounded-full">
+
+                        <button
+                            @click="open = !open"
+                            class="rounded-full bg-[#292522] px-5 py-2 font-medium text-white shadow-sm transition hover:bg-[#665246]">
                             {{ auth()->user()->name }} ▾
                         </button>
-                        <div x-show="open" @click.outside="open = false" x-cloak
-                             class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow border border-rose-100 p-1">
+
+                        <div
+                            x-show="open"
+                            @click.outside="open = false"
+                            x-cloak
+                            x-transition
+                            class="absolute right-0 mt-3 w-44 rounded-xl border border-[#E6DED2] bg-white p-2 shadow-xl">
+
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-rose-50">Keluar</button>
+
+                                <button
+                                    class="w-full rounded-lg px-3 py-2 text-left text-[#665246] transition hover:bg-[#F5F1EA]">
+                                    Keluar
+                                </button>
                             </form>
+
                         </div>
+
                     </div>
+
                 @else
-                    <a href="{{ route('login') }}" class="px-4 py-1.5 rounded-full border border-brand-dark">Masuk</a>
-                    <a href="{{ route('register') }}" class="px-4 py-1.5 rounded-full bg-brand-dark text-white">Daftar</a>
+
+                    <a href="{{ route('login') }}"
+                       class="rounded-full border border-[#A1876C] px-5 py-2 font-semibold text-[#665246] transition hover:bg-[#EDE7DE]">
+                        Masuk
+                    </a>
+
+                    <a href="{{ route('register') }}"
+                       class="rounded-full bg-[#292522] px-5 py-2 font-semibold text-white transition hover:bg-[#665246]">
+                        Daftar
+                    </a>
+
                 @endauth
+
             </div>
+
         </nav>
+
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 min-h-[70vh]">
+
+    {{-- MAIN CONTENT --}}
+    <main class="mx-auto min-h-[70vh] max-w-6xl px-4 py-8">
+
+        {{-- SUCCESS NOTIFICATION --}}
         @if (session('success'))
-            <div class="mb-4 rounded-xl bg-green-100 text-green-800 px-4 py-2">{{ session('success') }}</div>
+
+            <div class="mb-5 rounded-xl border border-[#C5D8C0] bg-[#EDF4EA] px-5 py-3 text-sm font-medium text-[#42613D]">
+                ✓ {{ session('success') }}
+            </div>
+
         @endif
+
+        {{-- ERROR NOTIFICATION --}}
         @if ($errors->any())
-            <div class="mb-4 rounded-xl bg-red-100 text-red-800 px-4 py-2">{{ $errors->first() }}</div>
+
+            <div class="mb-5 rounded-xl border border-[#E5C6BE] bg-[#F8ECE8] px-5 py-3 text-sm text-[#914C40]">
+                {{ $errors->first() }}
+            </div>
+
         @endif
 
         @yield('content')
+
     </main>
 
-    <footer class="border-t border-rose-100 py-6 text-center text-sm text-stone-500">
-        Sya's Costura · Digital Atelier &amp; Fashion Custom Studio · Pekanbaru
+
+    {{-- FOOTER --}}
+    <footer class="mt-12 border-t border-[#E6DED2] bg-[#F1ECE3]">
+
+        <div class="mx-auto max-w-6xl px-4 py-10">
+
+            <div class="text-center">
+
+                <h2 class="font-serif text-2xl font-bold tracking-wide text-[#665246]">
+                    Sya's Costura.
+                </h2>
+
+                <p class="mt-3 text-sm text-[#746B62]">
+                    The Art of Tailoring, Made Just for You.
+                </p>
+
+                <div class="mx-auto my-5 h-px w-16 bg-[#A1876C]"></div>
+
+                <p class="text-xs tracking-wide text-[#81766B]">
+                    Digital Atelier &amp; Fashion Custom Studio
+                </p>
+
+                <p class="mt-2 text-xs text-[#81766B]">
+                    Pekanbaru · Indonesia
+                </p>
+
+                <p class="mt-6 text-xs text-[#9A8D80]">
+                    © {{ date('Y') }} Sya's Costura. All Rights Reserved.
+                </p>
+
+            </div>
+
+        </div>
+
     </footer>
 
+
+    {{-- WHATSAPP POPUP --}}
     <x-whatsapp-popup />
+
 </body>
 </html>

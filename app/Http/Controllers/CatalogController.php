@@ -1,4 +1,4 @@
-<?php
+<?php 
 namespace App\Http\Controllers;
 
 use App\Models\Category;
@@ -13,11 +13,21 @@ class CatalogController extends Controller
 
         $services = Service::with('category')
             ->when($request->q, fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
-            ->when($request->category, fn($q, $c) => $q->whereHas('category', fn($x) => $x->where('slug', $c)))
+            ->when($request->category, fn($q, $c) => $q->whereHas(
+                'category',
+                fn($x) => $x->where('slug', $c)
+            ))
             ->latest()
             ->paginate(6)
             ->withQueryString();
 
         return view('catalog.index', compact('services', 'categories'));
+    }
+
+    public function show(Service $service)
+    {
+        $service->load('category');
+
+        return view('catalog.show', compact('service'));
     }
 }
