@@ -27,42 +27,95 @@ class BookingController extends Controller
 
     public function store(Request $request, Service $service)
     {
-        $validator = Validator::make($request->all(), [
+        $isPickup = $request->input('fulfillment_type') === 'pickup';
+
+        $rules = [
             'phone' => ['required', 'string', 'max:20'],
-            'booking_date' => ['required', 'date', 'after_or_equal:today'],
-            'time_slot' => [
+
+            'size_name' => ['required', 'string', 'max:100'],
+            'dimensions_label' => ['required', 'string'],
+
+            'fabric_id' => ['nullable', 'exists:fabrics,id'],
+
+            'fulfillment_type' => [
+                'required',
+                Rule::in(['pickup', 'delivery']),
+            ],
+
+            'payment_type' => [
+                'required',
+                Rule::in(['dp', 'full']),
+            ],
+
+            'recipient_name' => [
+                'required_if:fulfillment_type,delivery',
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'full_address' => [
+                'required_if:fulfillment_type,delivery',
+                'nullable',
+                'string',
+            ],
+
+            'city' => [
+                'required_if:fulfillment_type,delivery',
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'postal_code' => [
+                'required_if:fulfillment_type,delivery',
+                'nullable',
+                'string',
+                'max:10',
+            ],
+        ];
+
+        // Jadwal hanya diperlukan untuk janji pengambilan di toko.
+        if ($isPickup) {
+            $rules['booking_date'] = [
+                'required',
+                'date',
+                'after_or_equal:today',
+            ];
+
+            $rules['time_slot'] = [
                 'required',
                 'string',
                 Rule::unique('store_bookings', 'time_slot')
                     ->where(fn ($query) =>
                         $query->where('booking_date', $request->booking_date)
                     ),
-            ],
-            'booking_type' => [
-                'required',
-                Rule::in(['fitting', 'pickup_appointment']),
-            ],
-            'size_name' => ['required', 'string', 'max:100'],
-            'dimensions_label' => ['required', 'string'],
-            'fabric_id' => ['nullable', 'exists:fabrics,id'],
-            'fulfillment_type' => [
-                'required',
-                Rule::in(['pickup', 'delivery']),
-            ],
-            'recipient_name' => ['required_if:fulfillment_type,delivery', 'nullable', 'string', 'max:255'],
-            'full_address' => ['required_if:fulfillment_type,delivery', 'nullable', 'string'],
-            'city' => ['required_if:fulfillment_type,delivery', 'nullable', 'string', 'max:255'],
-            'postal_code' => ['required_if:fulfillment_type,delivery', 'nullable', 'string', 'max:10'],
-            'payment_type' => ['required', Rule::in(['dp', 'full'])],
-        ], [
+            ];
+        } else {
+            $rules['booking_date'] = ['nullable'];
+            $rules['time_slot'] = ['nullable'];
+        }
+
+        $validator = Validator::make($request->all(), $rules, [
+            'booking_date.required' => 'Tanggal pengambilan wajib dipilih.',
+            'booking_date.after_or_equal' => 'Tanggal pengambilan tidak boleh sebelum hari ini.',
+            'time_slot.required' => 'Jam pengambilan wajib dipilih.',
             'time_slot.unique' => 'Jadwal tersebut sudah dipesan. Silakan pilih jam lain.',
-            'booking_date.after_or_equal' => 'Tanggal booking tidak boleh sebelum hari ini.',
+            'recipient_name.required_if' => 'Nama penerima wajib diisi.',
+            'full_address.required_if' => 'Alamat lengkap wajib diisi.',
+            'city.required_if' => 'Kota wajib diisi.',
+            'postal_code.required_if' => 'Kode pos wajib diisi.',
         ]);
 
         $validated = $validator->validate();
 
-        $order = DB::transaction(function () use ($request, $service, $validated) {
-
+        $order = DB::transaction(function () use (
+            $request,
+            $service,
+            $validated,
+            $isPickup
+        ) {
+            // DATA PELANGGAN
             $customer = Customer::firstOrNew([
                 'user_id' => $request->user()->id,
             ]);
@@ -70,6 +123,7 @@ class BookingController extends Controller
             $customer->phone = $validated['phone'];
             $customer->save();
 
+            // DATA UKURAN
             $size = Size::create([
                 'customer_id' => $customer->id,
                 'size_name' => $validated['size_name'],
@@ -77,11 +131,12 @@ class BookingController extends Controller
                 'measurement_unit' => 'cm',
             ]);
 
+            // PILIHAN KAIN
             $fabric = !empty($validated['fabric_id'])
                 ? Fabric::findOrFail($validated['fabric_id'])
                 : null;
 
-            // Harga jasa + biaya kain jika kain dipilih.
+            // PERHITUNGAN HARGA
             $totalPrice = (float) $service->price;
 
             if ($fabric) {
@@ -90,7 +145,7 @@ class BookingController extends Controller
                     (float) $service->fabric_need_meter;
             }
 
-            // Perhitungan DP 50%.
+            // PERHITUNGAN PEMBAYARAN
             if ($validated['payment_type'] === 'dp') {
                 $dpAmount = $totalPrice * 0.5;
                 $remainingAmount = $totalPrice - $dpAmount;
@@ -99,6 +154,7 @@ class BookingController extends Controller
                 $remainingAmount = 0;
             }
 
+            // SIMPAN PESANAN
             $order = Order::create([
                 'code' => 'SC-' . strtoupper(Str::random(10)),
                 'customer_id' => $customer->id,
@@ -114,15 +170,20 @@ class BookingController extends Controller
                 'status' => 'Pending',
             ]);
 
-            StoreBooking::create([
-                'order_id' => $order->id,
-                'customer_id' => $customer->id,
-                'booking_date' => $validated['booking_date'],
-                'time_slot' => $validated['time_slot'],
-                'booking_type' => $validated['booking_type'],
-                'status' => 'pending',
-            ]);
+            // JANJI PENGAMBILAN DI TOKO
+            // Delivery tidak membuat booking atau jadwal fitting.
+            if ($isPickup) {
+                StoreBooking::create([
+                    'order_id' => $order->id,
+                    'customer_id' => $customer->id,
+                    'booking_date' => $validated['booking_date'],
+                    'time_slot' => $validated['time_slot'],
+                    'booking_type' => 'pickup_appointment',
+                    'status' => 'pending',
+                ]);
+            }
 
+            // ALAMAT PENGIRIMAN
             if ($validated['fulfillment_type'] === 'delivery') {
                 DB::table('shipping_addresses')->insert([
                     'order_id' => $order->id,
@@ -138,6 +199,7 @@ class BookingController extends Controller
             return $order;
         });
 
-        return view('booking.success', compact('order'));
+        return redirect()->route('checkout.show', $order->code)
+            ->with('success', 'Pesanan berhasil dibuat. Silakan periksa detail checkout.');
     }
 }

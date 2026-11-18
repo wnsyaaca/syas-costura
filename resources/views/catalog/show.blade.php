@@ -12,6 +12,7 @@
 
     <div class="grid md:grid-cols-2 gap-10 mt-8 items-start">
 
+        {{-- GAMBAR LAYANAN --}}
         <div class="rounded-3xl overflow-hidden bg-[#E6DED2] min-h-[350px] flex items-center justify-center">
             @if ($service->image_path)
                 <img
@@ -32,6 +33,7 @@
             @endif
         </div>
 
+        {{-- INFORMASI LAYANAN --}}
         <div>
             <p class="text-sm uppercase tracking-[0.25em] text-[#A1876C]">
                 {{ $service->category->name ?? 'Our Collection' }}
@@ -55,15 +57,18 @@
                 {{ $service->description ?: 'Layanan jahit custom dari Sya\'s Costura.' }}
             </p>
 
+            {{-- KEBUTUHAN BAHAN --}}
             <div class="mt-6 rounded-2xl bg-[#F7F4EE] p-5">
                 <p class="text-sm text-stone-600">
                     Estimasi kebutuhan bahan
                 </p>
+
                 <p class="font-semibold text-[#665246] mt-1">
                     {{ $service->fabric_need_meter ?? 0 }} meter
                 </p>
             </div>
 
+            {{-- PILIHAN PEMESANAN --}}
             <div class="mt-8">
                 <p class="text-sm text-stone-500">
                     Tertarik dengan layanan ini?
@@ -75,13 +80,13 @@
 
                 <div class="mt-5 space-y-3">
 
-                    {{-- Tombol Pesan melalui Website --}}
-                    <a href="{{ route('booking.create', $service->id) }}"
+                    {{-- PESAN ONLINE / CHECKOUT --}}
+                    <a href="{{ route('checkout.create', $service->id) }}"
                        class="block text-center bg-[#665246] hover:bg-[#292522] text-white px-8 py-3 rounded-full transition">
                         Pesan Sekarang
                     </a>
 
-                    {{-- Tombol Konsultasi WhatsApp --}}
+                    {{-- KONSULTASI WHATSAPP --}}
                     <a href="https://wa.me/6281266649126"
                        target="_blank"
                        rel="noopener noreferrer"

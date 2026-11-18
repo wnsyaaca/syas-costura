@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -46,7 +47,8 @@
         <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
 
             {{-- LOGO --}}
-            <a href="/" class="font-serif text-2xl font-bold tracking-wide text-[#665246] transition hover:text-[#A1876C]">
+            <a href="/"
+               class="font-serif text-2xl font-bold tracking-wide text-[#665246] transition hover:text-[#A1876C]">
                 Sya's <span class="text-[#A1876C]">Costura.</span>
             </a>
 
@@ -55,20 +57,20 @@
 
                 @php
                     $menu = [
-                        ['Beranda', '/'],
-                        ['Katalog', '/katalog'],
-                        ['Booking', '/booking'],
-                        ['Checkout', '/checkout/create'],
-                        ['Tracking', '/tracking'],
+                        ['Beranda', route('home')],
+                        ['Katalog', route('katalog')],
+                        ['Booking', route('booking.index')],
+                        ['Checkout', route('checkout.index')],
+                        ['Tracking', route('tracking.index')],
                     ];
                 @endphp
 
                 @foreach ($menu as [$label, $url])
 
                     @php
-                        $active = $url === '/'
-                            ? request()->is('/')
-                            : request()->is(trim($url, '/') . '*');
+                        $active = $label === 'Beranda'
+                            ? request()->routeIs('home')
+                            : request()->is(trim(parse_url($url, PHP_URL_PATH), '/') . '*');
                     @endphp
 
                     <a href="{{ $url }}"
@@ -146,7 +148,6 @@
 
     </header>
 
-
     {{-- MAIN CONTENT --}}
     <main class="mx-auto min-h-[70vh] max-w-6xl px-4 py-8">
 
@@ -171,7 +172,6 @@
         @yield('content')
 
     </main>
-
 
     {{-- FOOTER --}}
     <footer class="mt-12 border-t border-[#E6DED2] bg-[#F1ECE3]">
@@ -207,7 +207,6 @@
         </div>
 
     </footer>
-
 
     {{-- WHATSAPP POPUP --}}
     <x-whatsapp-popup />

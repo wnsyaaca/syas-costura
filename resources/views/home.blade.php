@@ -1,4 +1,5 @@
-﻿@extends('layouts.costura')
+﻿
+@extends('layouts.costura')
 
 @section('content')
 
@@ -22,16 +23,24 @@
                 Setiap jahitan dibuat dengan perhatian pada detail dan kenyamanan.
             </p>
 
+            {{-- TIGA PILIHAN UTAMA --}}
             <div class="mt-8 flex flex-wrap gap-3">
-                <a href="/katalog"
-                   class="rounded-full bg-[#292522] px-7 py-3 font-semibold text-white shadow-md transition duration-300 hover:-translate-y-1 hover:bg-[#665246]">
+
+                <a href="{{ route('katalog') }}"
+                   class="rounded-full bg-[#292522] px-6 py-3 font-semibold text-white shadow-md transition duration-300 hover:-translate-y-1 hover:bg-[#665246]">
                     Lihat Katalog →
                 </a>
 
-                <a href="/booking"
-                   class="rounded-full border border-[#A1876C] bg-white px-7 py-3 font-semibold text-[#665246] transition duration-300 hover:bg-[#EAE2D6]">
+                <a href="{{ route('booking.index') }}"
+                   class="rounded-full border border-[#A1876C] bg-white px-6 py-3 font-semibold text-[#665246] transition duration-300 hover:-translate-y-1 hover:bg-[#EAE2D6]">
                     Booking Fitting
                 </a>
+
+                <a href="{{ route('katalog') }}"
+                   class="rounded-full border border-[#A1876C] bg-[#DED1BF] px-6 py-3 font-semibold text-[#292522] transition duration-300 hover:-translate-y-1 hover:bg-[#C9B99F]">
+                    Pesan Online →
+                </a>
+
             </div>
 
             <div class="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-[#746B62]">
@@ -81,6 +90,76 @@
 </section>
 
 
+{{-- PILIH CARA PEMESANAN --}}
+<section class="mt-16">
+
+    <div class="mb-8 text-center">
+        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-[#A1876C]">
+            How To Order
+        </p>
+
+        <h2 class="mt-2 font-serif text-3xl font-bold text-[#292522]">
+            Mulai Perjalanan Gayamu
+        </h2>
+
+        <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[#746B62]">
+            Pilih cara pemesanan yang paling sesuai dengan kebutuhanmu.
+            Kami siap membantu mewujudkan pakaian impianmu.
+        </p>
+    </div>
+
+    <div class="grid gap-5 md:grid-cols-2">
+
+        {{-- BOOKING FITTING --}}
+        <div class="rounded-3xl border border-[#E6DED2] bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F5F1EA] text-3xl">
+                ✂
+            </div>
+
+            <h3 class="font-serif text-2xl font-bold text-[#292522]">
+                Booking Fitting
+            </h3>
+
+            <p class="mt-3 text-sm leading-relaxed text-[#746B62]">
+                Ingin datang langsung ke butik? Pilih tanggal dan jam
+                kunjungan untuk konsultasi, pengukuran, dan fitting
+                bersama tim Sya's Costura.
+            </p>
+
+            <a href="{{ route('booking.index') }}"
+               class="mt-6 inline-flex rounded-full bg-[#292522] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#665246]">
+                Jadwalkan Kunjungan →
+            </a>
+        </div>
+
+        {{-- PESAN ONLINE --}}
+        <div class="rounded-3xl border border-[#E6DED2] bg-[#F5F1EA] p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-3xl">
+                📦
+            </div>
+
+            <h3 class="font-serif text-2xl font-bold text-[#292522]">
+                Pesan Online
+            </h3>
+
+            <p class="mt-3 text-sm leading-relaxed text-[#746B62]">
+                Berada di luar kota? Kamu tetap bisa memesan pakaian
+                custom dengan mengisi ukuran tubuh, detail pesanan,
+                dan alamat pengiriman.
+            </p>
+
+            <a href="{{ route('katalog') }}"
+               class="mt-6 inline-flex rounded-full border border-[#A1876C] bg-white px-6 py-3 text-sm font-semibold text-[#665246] transition hover:bg-[#EAE2D6]">
+                Mulai Pesanan Online →
+            </a>
+        </div>
+
+    </div>
+</section>
+
+
 {{-- SERVICES SECTION --}}
 <section class="mt-16">
 
@@ -99,7 +178,7 @@
             </p>
         </div>
 
-        <a href="/katalog"
+        <a href="{{ route('katalog') }}"
            class="rounded-full border border-[#C9B99F] px-5 py-2 text-sm font-semibold text-[#665246] transition hover:bg-[#F5F1EA]">
             Lihat Semua →
         </a>
@@ -188,7 +267,7 @@
         Percayakan kebutuhan jahitmu kepada Sya's Costura.
     </p>
 
-    <a href="/katalog"
+    <a href="{{ route('katalog') }}"
        class="mt-8 inline-block rounded-full bg-[#F5F1EA] px-8 py-3 font-semibold text-[#292522] transition hover:bg-[#DED1BF]">
         Mulai Pesananmu →
     </a>

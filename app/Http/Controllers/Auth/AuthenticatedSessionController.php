@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -27,11 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Admin langsung menuju halaman admin.
         if (auth()->user()->role === 'admin') {
             return redirect('/admin');
         }
 
-        return redirect('/');
+        // Pelanggan kembali ke halaman yang sebelumnya dituju.
+        return redirect()->intended(route('booking.index'));
     }
 
     /**
