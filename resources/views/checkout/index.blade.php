@@ -4,21 +4,19 @@
 
 @section('content')
 
-<div class="max-w-6xl mx-auto px-4 py-12">
+<div class="max-w-6xl mx-auto px-4 pt-6 pb-10">
 
     {{-- HEADER --}}
-    <div class="mb-10">
-        <p class="text-sm tracking-[0.2em] uppercase text-[#A1876C]">
-            Sya's Costura
-        </p>
+    <div class="mb-7">
 
-        <h1 class="font-serif text-3xl md:text-4xl text-[#292522] mt-2">
+        <h1 class="font-serif text-3xl md:text-4xl text-[#292522]">
             Checkout
         </h1>
 
         <p class="text-stone-500 mt-2">
             Lihat dan periksa pesanan online kamu.
         </p>
+
     </div>
 
     {{-- JIKA BELUM ADA PESANAN --}}

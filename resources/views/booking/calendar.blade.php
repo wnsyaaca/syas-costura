@@ -3,6 +3,7 @@
 @section('title', 'Booking Fitting - Sya\'s Costura')
 
 @section('content')
+
 @php
     $monthStart = $currentMonth->copy()->startOfMonth();
     $calendarStart = $monthStart->copy()->startOfWeek(Carbon\Carbon::MONDAY);
@@ -25,7 +26,7 @@
         && in_array($selectedTime, $timeSlots)
         && !$selectedSlots->contains($selectedTime);
 
-    // Menentukan bulan yang sedang aktif berdasarkan bulan sekarang.
+    // Menentukan bulan aktif
     $today = now()->startOfDay();
     $activeMonth = now()->format('Y-m');
 
@@ -33,26 +34,12 @@
     $isViewingPastMonth = $currentMonth->format('Y-m') < $activeMonth;
 @endphp
 
-<div class="max-w-7xl mx-auto px-4 py-12">
-
-    {{-- HEADER --}}
-    <div class="text-center mb-10">
-        <p class="text-sm tracking-[0.3em] uppercase text-[#9A8068] mb-3">
-            Sya's Costura
-        </p>
-
-        <h1 class="text-3xl md:text-4xl font-serif text-[#49392D]">
-            Booking Fitting
-        </h1>
-
-        <p class="text-[#817366] mt-3">
-            Pilih tanggal dan waktu untuk kunjungan fitting di toko kami.
-        </p>
-    </div>
+{{-- CONTAINER UTAMA --}}
+<div class="max-w-7xl mx-auto px-4 pt-4 pb-8 md:pt-5 md:pb-10">
 
     {{-- NOTIFIKASI BERHASIL --}}
     @if (session('success'))
-        <div class="mb-6 rounded-2xl border border-green-200 bg-green-50 p-4 text-green-800">
+        <div class="mb-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-green-800">
             <div class="font-semibold">Booking berhasil dikirim!</div>
             <p class="text-sm mt-1">{{ session('success') }}</p>
         </div>
@@ -60,7 +47,7 @@
 
     {{-- NOTIFIKASI ERROR --}}
     @if ($errors->any())
-        <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <div class="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
             <p class="font-semibold mb-2">Booking belum berhasil.</p>
 
             <ul class="list-disc pl-5 text-sm space-y-1">
@@ -72,13 +59,13 @@
     @endif
 
     {{-- KALENDER DAN PILIHAN JAM --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
 
         {{-- KOLOM KIRI: KALENDER --}}
-        <div class="min-w-0 bg-white border border-[#E8DED2] rounded-3xl shadow-sm p-5 md:p-6">
+        <div class="min-w-0 bg-white border border-[#E8DED2] rounded-3xl shadow-sm p-4 md:p-6">
 
             {{-- NAVIGASI BULAN --}}
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center justify-between mb-6">
 
                 <a href="{{ route('booking.index', ['month' => $previousMonth]) }}"
                    class="w-10 h-10 flex items-center justify-center rounded-full border border-[#E8DED2] text-[#725C49] hover:bg-[#F5F0E9]">
@@ -103,7 +90,7 @@
             </div>
 
             {{-- NAMA HARI --}}
-            <div class="grid grid-cols-7 gap-1 md:gap-2 text-center mb-3">
+            <div class="grid grid-cols-7 gap-1 md:gap-2 text-center mb-2">
                 @foreach (['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $dayName)
                     <div class="text-xs font-semibold text-[#806B57] py-2">
                         {{ $dayName }}
@@ -119,7 +106,7 @@
                     @php
                         $dateKey = $day->toDateString();
 
-                        // Apakah tanggal termasuk bulan yang sedang ditampilkan?
+                        // Tanggal termasuk bulan yang ditampilkan
                         $isCurrentMonth = $day->format('Y-m') === $currentMonth->format('Y-m');
 
                         $isPast = $day->lt($today);
@@ -130,15 +117,12 @@
 
                         $isSelected = $selectedDate === $dateKey;
 
-                        // Full Booking hanya jika:
-                        // 1. Sedang melihat bulan aktif.
-                        // 2. Tanggal sudah lewat.
-                        // 3. Bukan hari Sabtu/Minggu.
+                        // Full Booking untuk weekday yang sudah lewat
                         $isPastFullBooking = $isViewingActiveMonth
                             && $isPast
                             && !$isWeekend;
 
-                        // Jika kuota benar-benar habis.
+                        // Kuota benar-benar habis
                         $isCapacityFull = $remainingSlots === 0;
 
                         if ($remainingSlots === 3) {
@@ -156,14 +140,14 @@
                         }
                     @endphp
 
-                    {{-- 1. TANGGAL DI LUAR BULAN YANG DITAMPILKAN --}}
+                    {{-- 1. TANGGAL DI LUAR BULAN --}}
                     @if (!$isCurrentMonth)
 
                         <div
                             title="Tanggal di luar bulan ini."
-                            class="min-h-16 md:min-h-20 rounded-xl border border-[#F0EBE5] bg-[#F8F6F2] opacity-30 flex flex-col items-center justify-center">
+                            class="min-h-[72px] md:min-h-20 rounded-xl border border-[#F0EBE5] bg-[#F8F6F2] opacity-30 flex flex-col items-center justify-center gap-0.5 text-center">
 
-                            <span class="text-sm text-[#A99B8E]">
+                            <span class="text-sm leading-none text-[#A99B8E]">
                                 {{ $day->day }}
                             </span>
 
@@ -175,41 +159,41 @@
                         <div
                             title="Toko tutup pada hari Sabtu dan Minggu."
                             aria-disabled="true"
-                            class="min-h-16 md:min-h-20 rounded-xl border border-[#E8DED2] bg-[#F5F2EE] flex flex-col items-center justify-center cursor-not-allowed select-none">
+                            class="min-h-[72px] md:min-h-20 rounded-xl border border-[#E8DED2] bg-[#F5F2EE] flex flex-col items-center justify-center gap-0.5 text-center cursor-not-allowed select-none">
 
-                            <span class="text-sm font-semibold text-[#A99B8E]">
+                            <span class="text-sm font-semibold leading-none text-[#A99B8E]">
                                 {{ $day->day }}
                             </span>
 
                         </div>
 
-                    {{-- 3. SEMUA WEEKDAY DI BULAN MASA LALU --}}
+                    {{-- 3. BULAN YANG SUDAH BERLALU --}}
                     @elseif ($isViewingPastMonth)
 
                         <div
                             title="Bulan sudah berlalu."
                             aria-disabled="true"
-                            class="min-h-16 md:min-h-20 rounded-xl border border-[#E8DED2] bg-[#F5F2EE] flex flex-col items-center justify-center cursor-not-allowed select-none">
+                            class="min-h-[72px] md:min-h-20 rounded-xl border border-[#E8DED2] bg-[#F5F2EE] flex flex-col items-center justify-center gap-0.5 text-center cursor-not-allowed select-none">
 
-                            <span class="text-sm font-semibold text-[#A99B8E]">
+                            <span class="text-sm font-semibold leading-none text-[#A99B8E]">
                                 {{ $day->day }}
                             </span>
 
                         </div>
 
-                    {{-- 4. WEEKDAY YANG SUDAH LEWAT PADA BULAN AKTIF --}}
+                    {{-- 4. WEEKDAY YANG SUDAH LEWAT --}}
                     @elseif ($isPastFullBooking)
 
                         <div
                             title="Full Booking - Tanggal tidak tersedia untuk fitting."
                             aria-disabled="true"
-                            class="min-h-16 md:min-h-20 rounded-xl border-2 border-[#D9B9A5] bg-[#FCEEE7] flex flex-col items-center justify-center cursor-not-allowed select-none">
+                            class="min-h-[72px] md:min-h-20 rounded-xl border-2 border-[#D9B9A5] bg-[#FCEEE7] flex flex-col items-center justify-center gap-0.5 px-0.5 text-center cursor-not-allowed select-none">
 
-                            <span class="text-sm font-semibold text-[#A45F3E]">
+                            <span class="text-sm font-semibold leading-none text-[#A45F3E]">
                                 {{ $day->day }}
                             </span>
 
-                            <span class="text-[9px] md:text-[10px] font-bold mt-1 text-[#A45F3E]">
+                            <span class="text-[9px] md:text-[10px] font-bold leading-tight text-[#A45F3E]">
                                 Full Booking
                             </span>
 
@@ -221,36 +205,36 @@
                         <div
                             title="Full Booking - Semua slot sudah terisi."
                             aria-disabled="true"
-                            class="min-h-16 md:min-h-20 rounded-xl border-2 border-[#D9B9A5] bg-[#FCEEE7] flex flex-col items-center justify-center cursor-not-allowed select-none">
+                            class="min-h-[72px] md:min-h-20 rounded-xl border-2 border-[#D9B9A5] bg-[#FCEEE7] flex flex-col items-center justify-center gap-0.5 px-0.5 text-center cursor-not-allowed select-none">
 
-                            <span class="text-sm font-semibold text-[#A45F3E]">
+                            <span class="text-sm font-semibold leading-none text-[#A45F3E]">
                                 {{ $day->day }}
                             </span>
 
-                            <span class="text-[9px] md:text-[10px] font-bold mt-1 text-[#A45F3E]">
+                            <span class="text-[9px] md:text-[10px] font-bold leading-tight text-[#A45F3E]">
                                 Full Booking
                             </span>
 
                         </div>
 
-                    {{-- 6. TANGGAL YANG MASIH TERSEDIA --}}
+                    {{-- 6. TANGGAL TERSEDIA --}}
                     @else
 
                         <a href="{{ route('booking.index', [
                             'month' => $currentMonth->format('Y-m'),
                             'date' => $dateKey
                         ]) }}"
-                           class="min-h-16 md:min-h-20 rounded-xl border flex flex-col items-center justify-center transition {{ $availabilityClass }} {{ $isSelected ? 'ring-2 ring-[#806B57] ring-offset-2 shadow-md' : 'hover:shadow-sm' }}">
+                           class="min-h-[72px] md:min-h-20 rounded-xl border flex flex-col items-center justify-center gap-0.5 px-0.5 text-center transition {{ $availabilityClass }} {{ $isSelected ? 'ring-2 ring-[#806B57] ring-offset-2 shadow-md' : 'hover:shadow-sm' }}">
 
-                            <span class="text-sm font-semibold">
+                            <span class="text-sm font-semibold leading-none">
                                 {{ $day->day }}
                             </span>
 
-                            <span class="text-[10px] md:text-xs font-bold mt-1">
+                            <span class="text-[10px] md:text-xs font-bold leading-tight">
                                 {{ $remainingSlots }} slot
                             </span>
 
-                            <span class="text-[8px] md:text-[9px] mt-0.5">
+                            <span class="text-[8px] md:text-[9px] leading-tight">
                                 {{ $isSelected ? 'Dipilih' : $availabilityLabel }}
                             </span>
 
@@ -263,7 +247,7 @@
             </div>
 
             {{-- KETERANGAN WARNA --}}
-            <div class="mt-6 pt-5 border-t border-[#EEE7DF]">
+            <div class="mt-5 pt-4 border-t border-[#EEE7DF]">
 
                 <p class="text-xs font-semibold text-[#49392D] mb-3">
                     Keterangan ketersediaan slot
@@ -296,10 +280,10 @@
             </div>
 
             {{-- INFORMASI BOOKING --}}
-            <div class="mt-5 pt-5 border-t border-[#EEE7DF] text-xs text-[#817366]">
+            <div class="mt-4 pt-4 border-t border-[#EEE7DF] text-xs leading-relaxed text-[#817366] space-y-1">
                 <p>Senin - Jumat: tersedia untuk fitting.</p>
-                <p class="mt-1">Sabtu dan Minggu: toko tutup.</p>
-                <p class="mt-1">Maksimal 3 pelanggan setiap hari.</p>
+                <p>Sabtu dan Minggu: toko tutup.</p>
+                <p>Maksimal 3 pelanggan setiap hari.</p>
             </div>
 
         </div>
@@ -307,13 +291,13 @@
         {{-- KOLOM KANAN: PILIHAN JAM --}}
         <div class="min-w-0 bg-white border border-[#E8DED2] rounded-3xl shadow-sm p-5 md:p-6">
 
-            <h3 class="font-serif text-xl md:text-2xl text-[#49392D]">
+            <h3 class="font-serif text-xl md:text-2xl leading-tight text-[#49392D]">
                 Pilih Jam Fitting
             </h3>
 
             @if ($selectedDate)
 
-                <p class="text-sm text-[#817366] mt-2 mb-6">
+                <p class="text-sm text-[#817366] mt-2 mb-5 leading-relaxed">
                     {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('l, d F Y') }}
                 </p>
 
@@ -355,9 +339,9 @@
                 {{-- FORM BOOKING --}}
                 @if ($validSelectedTime)
 
-                    <div class="mt-7 border-t border-[#EEE7DF] pt-6">
+                    <div class="mt-6 border-t border-[#EEE7DF] pt-5">
 
-                        <div class="rounded-xl bg-[#F5F0E9] p-4 mb-6 text-sm text-[#49392D]">
+                        <div class="rounded-xl bg-[#F5F0E9] p-4 mb-5 text-sm leading-relaxed text-[#49392D]">
 
                             <p class="font-semibold mb-2">
                                 Ringkasan Jadwal
@@ -408,7 +392,7 @@
                                     maxlength="20"
                                     class="w-full rounded-xl border border-[#E8DED2] px-4 py-3 text-sm text-[#49392D] focus:outline-none focus:ring-2 focus:ring-[#B9A28B]">
 
-                                <p class="text-xs text-[#9A8068] mt-2">
+                                <p class="text-xs text-[#9A8068] mt-2 leading-relaxed">
                                     Nomor ini digunakan admin untuk menghubungi kamu.
                                 </p>
 
@@ -419,7 +403,7 @@
                                 Booking Sekarang
                             </button>
 
-                            <p class="text-xs text-center text-[#9A8068] mt-4">
+                            <p class="text-xs text-center text-[#9A8068] mt-3 leading-relaxed">
                                 Booking akan berstatus menunggu konfirmasi admin.
                             </p>
 
@@ -429,8 +413,8 @@
 
                 @else
 
-                    <div class="mt-7 rounded-xl bg-[#F5F0E9] p-5 text-center">
-                        <p class="text-sm text-[#817366]">
+                    <div class="mt-6 rounded-xl bg-[#F5F0E9] p-5 text-center">
+                        <p class="text-sm leading-relaxed text-[#817366]">
                             Silakan pilih salah satu jam yang tersedia untuk melanjutkan booking.
                         </p>
                     </div>
@@ -441,15 +425,15 @@
 
                 <div class="min-h-64 flex flex-col items-center justify-center text-center">
 
-                    <div class="w-16 h-16 rounded-full bg-[#F5F0E9] flex items-center justify-center mb-5">
+                    <div class="w-16 h-16 rounded-full bg-[#F5F0E9] flex items-center justify-center mb-4">
                         <span class="text-3xl text-[#806B57]">▦</span>
                     </div>
 
-                    <h4 class="font-serif text-lg text-[#49392D]">
+                    <h4 class="font-serif text-lg leading-tight text-[#49392D]">
                         Belum Ada Tanggal Dipilih
                     </h4>
 
-                    <p class="text-sm text-[#817366] mt-2 max-w-xs">
+                    <p class="text-sm text-[#817366] mt-2 max-w-xs leading-relaxed">
                         Silakan pilih tanggal pada kalender di sebelah kiri untuk melihat jam fitting yang tersedia.
                     </p>
 

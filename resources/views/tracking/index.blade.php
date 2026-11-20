@@ -1,25 +1,22 @@
-
 @extends('layouts.costura')
 
 @section('title', 'Tracking Pesanan - Sya\'s Costura')
 
 @section('content')
 
-<div class="max-w-6xl mx-auto px-4 py-12">
+<div class="max-w-6xl mx-auto px-4 pt-6 pb-10">
 
     {{-- HEADER --}}
-    <div class="mb-10">
-        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-[#A1876C]">
-            Sya's Costura
-        </p>
+    <div class="mb-7">
 
-        <h1 class="mt-3 font-serif text-3xl md:text-4xl font-bold text-[#292522]">
+        <h1 class="font-serif text-3xl md:text-4xl font-bold text-[#292522]">
             Tracking Pesanan
         </h1>
 
-        <p class="mt-3 text-sm text-[#746B62]">
+        <p class="mt-2 text-sm text-[#746B62]">
             Pantau perkembangan pesanan jahitanmu dengan mudah.
         </p>
+
     </div>
 
     {{-- DAFTAR PESANAN --}}
@@ -113,7 +110,8 @@
 
     @empty
 
-        <div class="rounded-2xl border border-[#E6DED2] bg-[#F7F4EE] px-6 py-16 text-center">
+        {{-- STATUS KOSONG --}}
+        <div class="bg-white border border-[#E6DED2] rounded-3xl p-10 md:p-16 text-center">
 
             <div class="mb-4 text-5xl">✂</div>
 
