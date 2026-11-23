@@ -1,47 +1,34 @@
 ﻿@php
-    $serviceName = strtolower(trim($service->name ?? ''));
+    $serviceImage = $service->image_path;
 
-    // Setiap layanan memiliki sumber foto masing-masing.
-    $serviceImage = null;
-    $imageAlt = $service->name;
-
-    // DRESS PESTA
-    if (str_contains($serviceName, 'dress pesta')) {
-        $serviceImage = 'https://images.unsplash.com/photo-1746025241442-64f9ad664905?auto=format&fit=crop&w=1000&q=85';
-        $imageAlt = 'Gaun pesta elegan dengan detail berkilau';
+    if (empty($serviceImage) && !empty($service->gallery_images)) {
+        $serviceImage = $service->gallery_images[0] ?? null;
     }
 
-    // DRESS HARIAN
-    elseif (str_contains($serviceName, 'dress harian')) {
-        $serviceImage = 'https://images.unsplash.com/photo-1762154057377-cc9d3dd6900c?auto=format&fit=crop&w=1000&q=85';
-        $imageAlt = 'Dress floral santai untuk aktivitas sehari-hari';
-    }
-
-    // OUTER BLAZER
-    elseif (str_contains($serviceName, 'outer') || str_contains($serviceName, 'blazer')) {
-        $serviceImage = 'https://images.unsplash.com/photo-1747814965209-2301e535f209?auto=format&fit=crop&w=1000&q=85';
-        $imageAlt = 'Model mengenakan outer blazer beige';
-    }
-
-    // KEBAYA MODERN
-    elseif (str_contains($serviceName, 'kebaya')) {
-        $serviceImage = 'https://unsplash.com/photos/wogd1mhVuFM/download?force=true';
-        $imageAlt = 'Kebaya modern kuning keemasan dengan bordir';
-    }
+    $imageAlt = 'Foto ' . $service->name . " - Sya's Costura";
 @endphp
 
 <div class="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#E6DED2] bg-white shadow-sm transition duration-300 hover:-translate-y-2 hover:shadow-xl">
 
-    {{-- FOTO LAYANAN --}}
+    {{-- FOTO PRODUK --}}
     <div class="relative h-64 w-full shrink-0 overflow-hidden bg-[#F1ECE3]">
 
         @if ($serviceImage)
             <img
                 src="{{ $serviceImage }}"
                 alt="{{ $imageAlt }}"
-                class="block h-full w-full max-w-none object-cover object-center transition duration-700 group-hover:scale-105"
+                class="block h-full w-full object-cover object-center transition duration-700 group-hover:scale-105"
                 loading="lazy"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
             >
+
+            <div
+                class="absolute inset-0 hidden items-center justify-center bg-[#F1ECE3]"
+            >
+                <span class="text-sm text-[#81766B]">
+                    Foto belum tersedia
+                </span>
+            </div>
         @else
             <div class="flex h-full w-full items-center justify-center">
                 <span class="text-sm text-[#81766B]">
@@ -59,7 +46,7 @@
 
     </div>
 
-    {{-- INFORMASI LAYANAN --}}
+    {{-- INFORMASI PRODUK --}}
     <div class="flex flex-1 flex-col px-4 pb-4 pt-4">
 
         <div>
