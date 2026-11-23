@@ -5,17 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', "Sya's Costura")</title>
 
-    {{-- FONT MONTSERRAT UNTUK BODY UMUM --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    {{-- TAILWIND --}}
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    {{-- GLOBAL THEME --}}
     <style type="text/tailwindcss">
         @theme {
             --color-brand: #806B57;
@@ -40,12 +37,6 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | FONT NAVBAR - TETAP DIPERTAHANKAN
-        |--------------------------------------------------------------------------
-        */
-
         .costura-navbar,
         .costura-navbar a,
         .costura-navbar button {
@@ -60,12 +51,6 @@
             line-height: 1;
             white-space: nowrap;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | NAVBAR SPACING
-        |--------------------------------------------------------------------------
-        */
 
         .costura-nav {
             display: grid;
@@ -103,11 +88,38 @@
             white-space: nowrap;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | TABLET
-        |--------------------------------------------------------------------------
-        */
+        .costura-cart {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            min-height: 38px;
+            padding: 0.4rem 0.7rem;
+            border-radius: 9999px;
+            color: #665246;
+            transition: 0.3s;
+        }
+
+        .costura-cart:hover {
+            background: #EDE7DE;
+            color: #292522;
+        }
+
+        .costura-cart-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 5px;
+            border-radius: 9999px;
+            background: #665246;
+            color: white;
+            font-family: 'Montserrat', sans-serif !important;
+            font-size: 10px;
+            font-weight: 700;
+        }
 
         @media (min-width: 768px) and (max-width: 1023px) {
             .costura-nav {
@@ -134,30 +146,31 @@
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | MOBILE
-        |--------------------------------------------------------------------------
-        */
-
         @media (max-width: 767px) {
             .costura-nav {
                 grid-template-columns: minmax(0, 1fr) auto;
-                column-gap: 0.75rem;
+                column-gap: 0.5rem;
                 min-height: 38px;
             }
 
             .costura-logo {
-                font-size: 1.65rem;
+                font-size: 1.5rem;
             }
 
             .costura-account {
                 justify-self: end;
+                gap: 0.25rem;
+                font-size: 0.95rem;
             }
 
             .costura-account button {
-                padding: 0.5rem 0.85rem;
-                font-size: 0.95rem;
+                padding: 0.5rem 0.65rem;
+                font-size: 0.9rem;
+            }
+
+            .costura-cart {
+                padding: 0.4rem 0.45rem;
+                gap: 0.25rem;
             }
         }
     </style>
@@ -216,9 +229,42 @@
 
             </div>
 
-            {{-- TOMBOL AKUN --}}
+            {{-- AKUN DAN KERANJANG --}}
             <div class="costura-account flex items-center gap-2">
 
+                @php
+                    $cartCount = collect(session('cart', []))->sum('quantity');
+                @endphp
+
+                {{-- TOMBOL KERANJANG: IKON SAJA --}}
+                <a href="{{ route('cart.index') }}"
+                   aria-label="Lihat keranjang belanja"
+                   title="Keranjang Belanja"
+                   class="costura-cart {{ request()->routeIs('cart.*') ? 'bg-[#E6DED2]' : '' }}">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="20"
+                         height="20"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.7"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"/>
+                        <circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+
+                    @if ($cartCount > 0)
+                        <span class="costura-cart-count">
+                            {{ $cartCount }}
+                        </span>
+                    @endif
+
+                </a>
+
+                {{-- AKUN --}}
                 @auth
                     <div x-data="{ open: false }" class="relative">
 

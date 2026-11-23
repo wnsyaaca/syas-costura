@@ -8,6 +8,7 @@ use App\Http\Controllers\BookingCalendarController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CartCheckoutController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -45,8 +46,7 @@ Route::delete('/keranjang/{key}', [CartController::class, 'destroy'])
 
 
 // ========================================
-// BOOKING FITTING - KALENDER
-// DIPERTAHANKAN SEMENTARA
+// BOOKING FITTING
 // ========================================
 Route::get('/booking', [BookingCalendarController::class, 'index'])
     ->name('booking.index');
@@ -65,14 +65,13 @@ Route::get('/dashboard', function () {
 // ========================================
 Route::middleware('auth')->group(function () {
 
-    // BOOKING FITTING DARI KALENDER
+    // BOOKING FITTING
     Route::post('/booking', [BookingCalendarController::class, 'store'])
         ->name('booking.calendar.store');
 
 
     // ========================================
-    // PEMESANAN ONLINE LAMA
-    // DIPERTAHANKAN SEMENTARA
+    // PEMESANAN SATU PRODUK LAMA
     // ========================================
     Route::get('/checkout/pesan/{service}', [BookingController::class, 'create'])
         ->name('checkout.create');
@@ -82,7 +81,17 @@ Route::middleware('auth')->group(function () {
 
 
     // ========================================
-    // CHECKOUT / RIWAYAT PESANAN
+    // CHECKOUT KERANJANG ONLINE
+    // ========================================
+    Route::get('/checkout/keranjang', [CartCheckoutController::class, 'create'])
+        ->name('cart.checkout');
+
+    Route::post('/checkout/keranjang', [CartCheckoutController::class, 'store'])
+        ->name('cart.checkout.store');
+
+
+    // ========================================
+    // RIWAYAT CHECKOUT
     // ========================================
     Route::get('/checkout', [CheckoutController::class, 'index'])
         ->name('checkout.index');

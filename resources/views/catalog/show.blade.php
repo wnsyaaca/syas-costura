@@ -5,84 +5,54 @@
 @section('content')
 
 @php
-    $serviceName = strtolower(trim($service->name ?? ''));
-
     /*
     |--------------------------------------------------------------------------
-    | FOTO UTAMA DAN GALERI PRODUK
+    | GALERI FOTO PRODUK
     |--------------------------------------------------------------------------
-    | Foto pertama disamakan dengan catalog/_card.blade.php.
+    | Foto utama dan tambahan dibaca dari database produk.
+    | Tidak ada foto acak berdasarkan nama produk.
     */
 
     $galleryImages = [];
-    $imageAlt = $service->name;
+    $imageAlt = $service->name . " - Sya's Costura";
 
-    // DRESS PESTA
-    if (str_contains($serviceName, 'dress pesta')) {
-        $galleryImages = [
-            'https://images.unsplash.com/photo-1746025241442-64f9ad664905?auto=format&fit=crop&w=1200&q=90',
-            'https://images.unsplash.com/photo-1774235837082-42bede978849?auto=format&fit=crop&w=1200&q=85',
-            'https://images.unsplash.com/photo-1765229288423-0013fdc66d9f?auto=format&fit=crop&w=1200&q=85',
-        ];
-
-        $imageAlt = 'Dress pesta elegan';
-    }
-
-    // DRESS HARIAN
-    elseif (str_contains($serviceName, 'dress harian')) {
-        $galleryImages = [
-            'https://images.unsplash.com/photo-1762154057377-cc9d3dd6900c?auto=format&fit=crop&w=1200&q=90',
-            'https://images.unsplash.com/photo-1765229288423-0013fdc66d9f?auto=format&fit=crop&w=1200&q=85',
-            'https://images.unsplash.com/photo-1565593797124-4e318b97024d?auto=format&fit=crop&w=1200&q=85',
-        ];
-
-        $imageAlt = 'Dress floral untuk aktivitas sehari-hari';
-    }
-
-    // OUTER BLAZER
-    elseif (
-        str_contains($serviceName, 'outer') ||
-        str_contains($serviceName, 'blazer')
-    ) {
-        $galleryImages = [
-            'https://images.unsplash.com/photo-1747814965209-2301e535f209?auto=format&fit=crop&w=1200&q=90',
-            'https://images.unsplash.com/photo-1581963765745-769185072249?auto=format&fit=crop&w=1200&q=85',
-            'https://images.unsplash.com/photo-1565593797124-4e318b97024d?auto=format&fit=crop&w=1200&q=85',
-        ];
-
-        $imageAlt = 'Outer blazer wanita';
-    }
-
-    // KEBAYA MODERN
-    elseif (str_contains($serviceName, 'kebaya')) {
-        $galleryImages = [
-            'https://unsplash.com/photos/wogd1mhVuFM/download?force=true',
-            'https://images.unsplash.com/photo-1565593797124-4e318b97024d?auto=format&fit=crop&w=1200&q=85',
-            'https://images.unsplash.com/photo-1642126799747-9d4e5db08e5a?auto=format&fit=crop&w=1200&q=85',
-        ];
-
-        $imageAlt = 'Kebaya modern Indonesia';
-    }
-
-    // FALLBACK FOTO DARI DATABASE
-    else {
-        $databaseImage = $service->image_path;
-
-        if ($databaseImage) {
-            $databaseImage = str_starts_with($databaseImage, 'http')
-                ? $databaseImage
-                : asset('storage/' . $databaseImage);
-
-            $galleryImages[] = $databaseImage;
+    $formatImageUrl = function ($image) {
+        if (empty($image)) {
+            return null;
         }
 
-        foreach ($service->gallery_images ?? [] as $image) {
-            $galleryImages[] = str_starts_with($image, 'http')
-                ? $image
-                : asset('storage/' . $image);
+        $image = trim($image);
+
+        if (preg_match('/^https?:\/\//i', $image)) {
+            return $image;
+        }
+
+        if (str_starts_with($image, 'storage/')) {
+            return asset($image);
+        }
+
+        return asset('storage/' . ltrim($image, '/'));
+    };
+
+    // Foto utama.
+    if (!empty($service->image_path)) {
+        $mainImage = $formatImageUrl($service->image_path);
+
+        if ($mainImage) {
+            $galleryImages[] = $mainImage;
         }
     }
 
+    // Foto tambahan produk yang sama.
+    foreach (($service->gallery_images ?? []) as $image) {
+        $formattedImage = $formatImageUrl($image);
+
+        if ($formattedImage) {
+            $galleryImages[] = $formattedImage;
+        }
+    }
+
+    // Hilangkan duplikasi foto.
     $galleryImages = array_values(array_unique($galleryImages));
 
     $colors = $service->available_colors ?? [];
@@ -90,8 +60,16 @@
     $sizes = $service->standard_sizes ?: [
         'S', 'M', 'L', 'XL', 'XXL'
     ];
-@endphp
 
+    $measurementFields = [
+        'chest' => 'Lingkar Dada',
+        'waist' => 'Lingkar Pinggang',
+        'hip' => 'Lingkar Pinggul',
+        'shoulder' => 'Lebar Bahu',
+        'length' => 'Panjang Baju',
+        'sleeve' => 'Panjang Lengan',
+    ];
+@endphp
 
 <div class="min-h-screen bg-[#FAF8F4] py-10">
 
@@ -105,18 +83,16 @@
             ← Kembali ke Katalog
         </a>
 
-
         <div class="mt-8 grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-14">
 
             {{-- ================================================= --}}
-            {{-- GALERI FOTO SLIDE --}}
+            {{-- GALERI FOTO --}}
             {{-- ================================================= --}}
 
             <div>
 
                 <div class="relative">
 
-                    {{-- FOTO UTAMA --}}
                     <div
                         class="relative overflow-hidden rounded-[28px] bg-[#EAE3D9]"
                         style="aspect-ratio: 4 / 5;"
@@ -131,15 +107,12 @@
                                 class="h-full w-full object-cover transition-opacity duration-300"
                             >
 
-                            {{-- NOMOR FOTO --}}
-                            <div class="absolute bottom-4 right-4 rounded-full bg-black/55 px-4 py-2 text-xs font-medium text-white backdrop-blur-sm">
-                                <span id="currentImageNumber">1</span>
-                                /
-                                {{ count($galleryImages) }}
-                            </div>
-
-                            {{-- TOMBOL SEBELUMNYA --}}
                             @if(count($galleryImages) > 1)
+
+                                <div class="absolute bottom-4 right-4 rounded-full bg-black/55 px-4 py-2 text-xs font-medium text-white backdrop-blur-sm">
+                                    <span id="currentImageNumber">1</span>
+                                    / {{ count($galleryImages) }}
+                                </div>
 
                                 <button
                                     type="button"
@@ -150,7 +123,6 @@
                                     &#10094;
                                 </button>
 
-                                {{-- TOMBOL BERIKUTNYA --}}
                                 <button
                                     type="button"
                                     onclick="changeSlide(1)"
@@ -173,7 +145,7 @@
                                 </p>
 
                                 <p class="mt-2 text-sm text-[#806B57]">
-                                    Made with care, made for you
+                                    Foto produk belum tersedia
                                 </p>
 
                             </div>
@@ -182,8 +154,7 @@
 
                     </div>
 
-
-                    {{-- THUMBNAIL SLIDE --}}
+                    {{-- THUMBNAIL --}}
                     @if(count($galleryImages) > 1)
 
                         <div
@@ -197,10 +168,7 @@
                                     type="button"
                                     onclick="goToSlide({{ $index }})"
                                     data-thumbnail="{{ $index }}"
-                                    class="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition
-                                    {{ $index === 0
-                                        ? 'border-[#806B57]'
-                                        : 'border-transparent opacity-70 hover:opacity-100' }}"
+                                    class="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition {{ $index === 0 ? 'border-[#806B57]' : 'border-transparent opacity-70 hover:opacity-100' }}"
                                 >
 
                                     <img
@@ -216,14 +184,13 @@
 
                         </div>
 
+                        <p class="mt-2 text-center text-xs text-[#A49A8E]">
+                            Geser foto atau pilih gambar kecil untuk melihat koleksi
+                        </p>
+
                     @endif
 
-                    <p class="mt-2 text-center text-xs text-[#A49A8E]">
-                        Geser foto atau pilih gambar kecil untuk melihat koleksi
-                    </p>
-
                 </div>
-
 
                 {{-- INFORMASI ATELIER --}}
                 <div class="mt-5 rounded-2xl border border-[#E9E1D7] bg-white p-5">
@@ -245,14 +212,19 @@
 
             </div>
 
-
             {{-- ================================================= --}}
             {{-- INFORMASI PRODUK --}}
             {{-- ================================================= --}}
 
             <div>
 
-                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#A1876C]">
+                @if(!empty($service->series))
+                    <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#A1876C]">
+                        {{ $service->series }}
+                    </p>
+                @endif
+
+                <p class="mt-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#A1876C]">
                     {{ $service->category->name ?? 'Our Collection' }}
                 </p>
 
@@ -270,7 +242,6 @@
 
                 <div class="my-7 border-t border-[#E6DED2]"></div>
 
-
                 {{-- DESKRIPSI --}}
                 <div>
 
@@ -283,7 +254,6 @@
                     </p>
 
                 </div>
-
 
                 {{-- KEBUTUHAN BAHAN --}}
                 <div class="mt-6 rounded-2xl bg-[#F1ECE3] p-5">
@@ -298,7 +268,6 @@
 
                 </div>
 
-
                 {{-- ================================================= --}}
                 {{-- FORM KERANJANG --}}
                 {{-- ================================================= --}}
@@ -310,7 +279,6 @@
                 >
 
                     @csrf
-
 
                     {{-- PILIH WARNA --}}
                     <div>
@@ -361,7 +329,6 @@
 
                     </div>
 
-
                     {{-- PILIH UKURAN --}}
                     <div class="mt-7">
 
@@ -388,7 +355,6 @@
 
                             </label>
 
-
                             @if($service->allow_custom_size)
 
                                 <label class="cursor-pointer">
@@ -411,7 +377,6 @@
                             @endif
 
                         </div>
-
 
                         {{-- UKURAN STANDAR --}}
                         <div id="standardSizeSection" class="mt-5">
@@ -444,8 +409,13 @@
 
                             </div>
 
-                        </div>
+                            @error('size_label')
+                                <p class="mt-2 text-xs text-red-600">
+                                    {{ $message }}
+                                </p>
+                            @enderror
 
+                        </div>
 
                         {{-- UKURAN CUSTOM --}}
                         @if($service->allow_custom_size)
@@ -461,17 +431,6 @@
                                     <p class="mt-2 text-xs leading-6 text-[#A49A8E]">
                                         Masukkan ukuran badan dalam satuan centimeter (cm).
                                     </p>
-
-                                    @php
-                                        $measurementFields = [
-                                            'chest' => 'Lingkar Dada',
-                                            'waist' => 'Lingkar Pinggang',
-                                            'hip' => 'Lingkar Pinggul',
-                                            'shoulder' => 'Lebar Bahu',
-                                            'length' => 'Panjang Baju',
-                                            'sleeve' => 'Panjang Lengan',
-                                        ];
-                                    @endphp
 
                                     <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
 
@@ -508,12 +467,17 @@
 
                                     </div>
 
+                                    @error('custom_measurements.*')
+                                        <p class="mt-3 text-xs text-red-600">
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+
                                 </div>
 
                             </div>
 
                         @endif
-
 
                         @error('size_type')
                             <p class="mt-2 text-xs text-red-600">
@@ -521,20 +485,7 @@
                             </p>
                         @enderror
 
-                        @error('size_label')
-                            <p class="mt-2 text-xs text-red-600">
-                                {{ $message }}
-                            </p>
-                        @enderror
-
-                        @error('custom_measurements.*')
-                            <p class="mt-2 text-xs text-red-600">
-                                {{ $message }}
-                            </p>
-                        @enderror
-
                     </div>
-
 
                     {{-- JUMLAH --}}
                     <div class="mt-7">
@@ -565,7 +516,6 @@
 
                     </div>
 
-
                     {{-- TOMBOL TAMBAH KERANJANG --}}
                     <div class="mt-8 space-y-3">
 
@@ -593,7 +543,6 @@
 
                         </button>
 
-
                         {{-- WHATSAPP --}}
                         <a
                             href="https://wa.me/6281266649126"
@@ -607,7 +556,6 @@
                     </div>
 
                 </form>
-
 
                 {{-- INFORMASI TAMBAHAN --}}
                 <div class="mt-7 border-t border-[#E6DED2] pt-6">
@@ -637,9 +585,8 @@
 
 </div>
 
-
 {{-- ================================================= --}}
-{{-- JAVASCRIPT SLIDER --}}
+{{-- JAVASCRIPT GALERI DAN UKURAN --}}
 {{-- ================================================= --}}
 
 <script>
@@ -697,7 +644,6 @@
         }
     }
 
-
     function changeSlide(direction) {
         if (productImages.length <= 1) return;
 
@@ -714,7 +660,6 @@
         updateSlide();
     }
 
-
     function goToSlide(index) {
         if (index < 0 || index >= productImages.length) return;
 
@@ -722,39 +667,7 @@
         updateSlide();
     }
 
-
-    // SWIPE FOTO PADA HP
-    document.addEventListener('DOMContentLoaded', function () {
-
-        const mainImage = document.getElementById('mainProductImage');
-
-        if (mainImage) {
-            let startX = 0;
-            let endX = 0;
-
-            mainImage.addEventListener('touchstart', function (event) {
-                startX = event.changedTouches[0].screenX;
-            }, { passive: true });
-
-            mainImage.addEventListener('touchend', function (event) {
-                endX = event.changedTouches[0].screenX;
-
-                const distance = endX - startX;
-
-                if (Math.abs(distance) > 50) {
-                    changeSlide(distance < 0 ? 1 : -1);
-                }
-            }, { passive: true });
-        }
-
-        toggleCustomSize();
-
-    });
-
-
-    // PILIH UKURAN STANDAR ATAU CUSTOM
     function toggleCustomSize() {
-
         const selected = document.querySelector(
             'input[name="size_type"]:checked'
         );
@@ -789,6 +702,30 @@
             });
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const mainImage = document.getElementById('mainProductImage');
+
+        if (mainImage) {
+            let startX = 0;
+
+            mainImage.addEventListener('touchstart', function (event) {
+                startX = event.changedTouches[0].screenX;
+            }, { passive: true });
+
+            mainImage.addEventListener('touchend', function (event) {
+                const endX = event.changedTouches[0].screenX;
+                const distance = endX - startX;
+
+                if (Math.abs(distance) > 50) {
+                    changeSlide(distance < 0 ? 1 : -1);
+                }
+            }, { passive: true });
+        }
+
+        toggleCustomSize();
+    });
 </script>
 
 @endsection
